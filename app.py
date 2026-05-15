@@ -20,7 +20,7 @@ app.secret_key = "music_recommendation_secret_2026"
 # =========================================================
 
 USERNAME = "root"
-PASSWORD = ""
+PASSWORD = "Thanhhai2004@"
 HOST = "localhost"
 PORT = "3306"
 DB_NAME = "music_recommendation_db"
