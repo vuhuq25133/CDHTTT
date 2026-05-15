@@ -1,0 +1,202 @@
+<!DOCTYPE html>
+<html lang="vi">
+
+<head>
+    <meta charset="UTF-8">
+    <title>{{ song.song_name }} - MusicAI</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.0/font/bootstrap-icons.css">
+    <style>
+        body {
+            background-color: #121212;
+            color: white;
+        }
+
+        .sidebar {
+            background: #000;
+            min-height: 100vh;
+            width: 240px;
+            position: fixed;
+            padding: 20px;
+        }
+
+        .main-view {
+            margin-left: 240px;
+            padding: 40px;
+        }
+
+        .detail-header {
+            background: linear-gradient(to bottom, #2a2a2a, #121212);
+            padding: 40px;
+            border-radius: 15px;
+        }
+
+        .related-item {
+            border-radius: 8px;
+            padding: 10px 12px;
+            transition: background 0.2s;
+        }
+
+        .related-item:hover {
+            background: rgba(255, 255, 255, 0.08) !important;
+        }
+
+        .tab-btn {
+            background: transparent;
+            border: 1px solid #333;
+            color: #b3b3b3;
+            border-radius: 20px;
+            padding: 4px 16px;
+            font-size: 0.85rem;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+
+        .tab-btn.active,
+        .tab-btn:hover {
+            background: #1DB954;
+            border-color: #1DB954;
+            color: #000;
+        }
+
+        .rec-list {
+            display: none;
+        }
+
+        .rec-list.active {
+            display: block;
+        }
+    </style>
+</head>
+
+<body>
+    <div class="sidebar">
+        <h3 class="text-success mb-5"><i class="bi bi-spotify"></i> MusicAI</h3>
+        <a href="/dashboard" class="text-white text-decoration-none">
+            <i class="bi bi-arrow-left me-1"></i> Quay lại
+        </a>
+    </div>
+
+    <div class="main-view">
+
+        <!-- Song Header -->
+        <div class="detail-header mb-5 d-flex align-items-center shadow">
+            <div class="bg-dark p-5 rounded shadow"
+                style="background: linear-gradient(135deg,#1DB95433,#000) !important;">
+                <i class="bi bi-vinyl-fill display-1 text-success"></i>
+            </div>
+            <div class="ms-5">
+                <p class="text-uppercase small fw-bold text-muted mb-1">Bài hát</p>
+                <h1 class="display-4 fw-bold mb-1">{{ song.song_name }}</h1>
+                <h5 class="text-muted mb-3">{{ song.artist_name }}</h5>
+                <button class="btn btn-success btn-lg rounded-pill px-5 fw-bold">
+                    <i class="bi bi-play-fill me-1"></i> PHÁT
+                </button>
+            </div>
+        </div>
+
+        <div class="row g-4">
+
+            <!-- Thông tin bài hát -->
+            <div class="col-md-5">
+                <h5 class="mb-3 fw-bold">Thông tin bài hát</h5>
+                <table class="table table-dark table-borderless opacity-75">
+                    <tbody>
+                        <tr>
+                            <td class="text" style="width:120px;">Nghệ sĩ</td>
+                            <td>{{ song.artist_name }}</td>
+                        </tr>
+                        <tr>
+                            <td class="text">Sáng tác</td>
+                            <td>{{ song.composer if song.composer else '—' }}</td>
+                        </tr>
+                        <tr>
+                            <td class="text">Thể loại</td>
+                            <td>{{ song.genre_ids if song.genre_ids else '—' }}</td>
+                        </tr>
+                        <tr>
+                            <td class="text">Ngôn ngữ</td>
+                            <td>Mã {{ song.language if song.language else '—' }}</td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+
+            <!-- Gợi ý -->
+            <div class="col-md-7">
+                <div class="d-flex align-items-center gap-2 mb-3">
+                    <h5 class="fw-bold mb-0">Gợi ý</h5>
+                    <button class="tab-btn active" onclick="switchTab('content', this)">
+                        <i class="bi bi-magic me-1"></i> Nội dung tương tự
+                    </button>
+                    {% if knn_rec %}
+                    <button class="tab-btn" onclick="switchTab('knn', this)">
+                        <i class="bi bi-people-fill me-1"></i> Người nghe tương tự
+                    </button>
+                    {% endif %}
+                </div>
+
+                <!-- Content-Based -->
+                <div id="rec-content" class="rec-list active list-group list-group-flush">
+                    {% if content_rec %}
+                    {% for s in content_rec %}
+                    <a href="{{ song_url(s.song_id) }}"
+                        class="list-group-item related-item bg-transparent text-white border-secondary border-opacity-25 mb-1">
+                        <div class="d-flex align-items-center">
+                            <div class="d-flex align-items-center justify-content-center rounded me-3 flex-shrink-0"
+                                style="width:40px;height:40px;background:#1DB95420;">
+                                <i class="bi bi-music-note text-success"></i>
+                            </div>
+                            <div class="overflow-hidden">
+                                <div class="fw-semibold text-truncate">{{ s.song_name }}</div>
+                                <small class="text-muted">{{ s.artist_name }}</small>
+                            </div>
+                            <i class="bi bi-chevron-right ms-auto text-muted"></i>
+                        </div>
+                    </a>
+                    {% endfor %}
+                    {% else %}
+                    <p class="text-muted fst-italic">Không có gợi ý nội dung tương tự.</p>
+                    {% endif %}
+                </div>
+
+                <!-- KNN -->
+                {% if knn_rec %}
+                <div id="rec-knn" class="rec-list list-group list-group-flush">
+                    {% for s in knn_rec %}
+                    <a href="{{ song_url(s.song_id) }}"
+                        class="list-group-item related-item bg-transparent text-white border-secondary border-opacity-25 mb-1">
+                        <div class="d-flex align-items-center">
+                            <div class="d-flex align-items-center justify-content-center rounded me-3 flex-shrink-0"
+                                style="width:40px;height:40px;background:#0d6efd20;">
+                                <i class="bi bi-vinyl text-primary"></i>
+                            </div>
+                            <div class="overflow-hidden">
+                                <div class="fw-semibold text-truncate">{{ s.song_name }}</div>
+                                <small class="text-muted">{{ s.artist_name }}</small>
+                            </div>
+                            <i class="bi bi-chevron-right ms-auto text-muted"></i>
+                        </div>
+                    </a>
+                    {% endfor %}
+                </div>
+                {% endif %}
+
+            </div>
+        </div>
+    </div>
+
+    <script>
+        function switchTab(tab, btn) {
+            // Ẩn tất cả danh sách
+            document.querySelectorAll('.rec-list').forEach(el => el.classList.remove('active'));
+            // Bỏ active tất cả nút
+            document.querySelectorAll('.tab-btn').forEach(el => el.classList.remove('active'));
+            // Hiện đúng section
+            document.getElementById('rec-' + tab).classList.add('active');
+            btn.classList.add('active');
+        }
+    </script>
+</body>
+
+</html>

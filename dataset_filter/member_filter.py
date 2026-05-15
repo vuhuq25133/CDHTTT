@@ -17,8 +17,8 @@ filtered_members = members.dropna(
 
 # Lọc tuổi hợp lệ
 filtered_members = filtered_members[
-    (filtered_members["bd"] >= 15) &
-    (filtered_members["bd"] <= 60)
+    (filtered_members["bd"] >= 1) &
+    (filtered_members["bd"] <= 100)
 ]
 
 # Nếu muốn chỉ giữ male/female
@@ -34,6 +34,6 @@ print("\nSố member còn lại:", len(filtered_members))
 print(filtered_members.head())
 
 # Lưu file mới
-filtered_members.to_csv("members_filtered.csv", index=False)
+filtered_members.to_csv("dataset_filter/members_filtered.csv", index=False)
 
 print("\nĐã lưu members_filtered.csv")

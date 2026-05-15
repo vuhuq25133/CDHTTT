@@ -1,0 +1,74 @@
+<!DOCTYPE html>
+<html lang="vi">
+
+<head>
+    <meta charset="UTF-8">
+    <title>Đăng nhập MusicAI</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <style>
+        body {
+            background: #121212;
+            color: white;
+            display: flex;
+            align-items: center;
+            height: 100vh;
+        }
+
+        .login-card {
+            background: #181818;
+            border: none;
+            border-radius: 10px;
+            width: 100%;
+            max-width: 400px;
+            padding: 30px;
+        }
+
+        .form-control {
+            background: #282828;
+            border: none;
+            color: white;
+        }
+
+        .form-control:focus {
+            background: #333;
+            color: white;
+            box-shadow: none;
+        }
+
+        .btn-spotify {
+            background: #1DB954;
+            color: white;
+            font-weight: bold;
+            border-radius: 50px;
+        }
+    </style>
+</head>
+
+<body>
+    <div class="container d-flex justify-content-center">
+        <div class="login-card shadow">
+            <h2 class="text-center mb-4">🎵 Đăng nhập</h2>
+
+            {% with messages = get_flashed_messages(with_categories=true) %}
+            {% if messages %}
+            {% for category, message in messages %}
+            <div class="alert alert-{{ category }} small">{{ message }}</div>
+            {% endfor %}
+            {% endif %}
+            {% endwith %}
+
+            <form method="POST">
+                <div class="mb-3">
+                    <label class="form-label">Nhập ID người dùng (msno)</label>
+                    <input type="text" name="msno" class="form-control" placeholder="Ví dụ: user_01" required>
+                </div>
+                <button type="submit" class="btn btn-spotify w-100 py-2">TIẾP TỤC</button>
+            </form>
+            <div class="text-center mt-3 small">
+                <a href="/register" class="text-muted text-decoration-none">Chưa có tài khoản? Đăng ký ngay</a>
+            </div>
+        </div>
+    </div>
+</body>
+
+</html>

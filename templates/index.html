@@ -1,0 +1,190 @@
+<!DOCTYPE html>
+<html lang="vi">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Hệ thống Gợi ý Nhạc - KKBox Demo</title>
+    <!-- Google Fonts & Bootstrap 5 -->
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600&display=swap" rel="stylesheet">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.0/font/bootstrap-icons.css">
+
+    <style>
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: #f0f2f5;
+            color: #333;
+        }
+
+        .sidebar {
+            background: white;
+            border-radius: 15px;
+            padding: 25px;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
+        }
+
+        .main-content {
+            background: transparent;
+        }
+
+        .song-card {
+            background: white;
+            border: none;
+            border-radius: 12px;
+            transition: all 0.3s ease;
+            border-left: 4px solid #0d6efd;
+        }
+
+        .song-card:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 10px 20px rgba(0, 0, 0, 0.08);
+        }
+
+        .btn-gradient {
+            background: linear-gradient(45deg, #0d6efd, #00d4ff);
+            color: white;
+            border: none;
+        }
+
+        .btn-gradient:hover {
+            color: white;
+            opacity: 0.9;
+        }
+
+        .user-info-banner {
+            background: linear-gradient(90deg, #4b6cb7 0%, #182848 100%);
+            color: white;
+            border-radius: 12px;
+            padding: 20px;
+        }
+
+        .genre-badge {
+            background-color: #e9ecef;
+            color: #495057;
+            font-weight: 500;
+        }
+    </style>
+</head>
+
+<body>
+
+    <nav class="navbar navbar-expand-lg navbar-dark bg-dark mb-4 shadow">
+        <div class="container">
+            <a class="navbar-brand" href="/"><i class="bi bi-music-note-beamed"></i> MusicAI Demo</a>
+            <div class="navbar-nav ms-auto">
+                <a class="btn btn-outline-light btn-sm" href="/register"><i class="bi bi-person-plus"></i> Tạo User
+                    Mới</a>
+            </div>
+        </div>
+    </nav>
+
+    <div class="container">
+        <div class="row g-4">
+            <!-- Cột trái: Chọn User -->
+            <div class="col-lg-4">
+                <div class="sidebar position-sticky" style="top: 20px;">
+                    <h5 class="mb-3 text-primary fw-bold">Trình điều khiển</h5>
+                    <p class="small text-muted">Chọn một ID người dùng từ Database để mô phỏng hệ thống gợi ý nhạc dựa
+                        trên Profile.</p>
+
+                    <form method="POST">
+                        <div class="mb-4">
+                            <label class="form-label fw-semibold">Danh sách User mẫu:</label>
+                            <select name="msno" class="form-select mb-3 shadow-sm" size="8">
+                                {% for u in users %}
+                                <option value="{{ u.msno }}" {% if user_info and user_info.msno==u.msno %}selected{%
+                                    endif %}>
+                                    {{ u.msno[:20] }}...
+                                </option>
+                                {% endfor %}
+                            </select>
+                            <button type="submit" class="btn btn-gradient w-100 fw-bold py-2">
+                                <i class="bi bi-lightning-charge"></i> PHÂN TÍCH & GỢI Ý
+                            </button>
+                        </div>
+                    </form>
+
+                    <hr>
+                    <div class="small text-muted">
+                        <p class="mb-1"><strong>Luật gợi ý hiện tại:</strong></p>
+                        <ul class="ps-3">
+                            <li>Tuổi < 30: Ưu tiên Pop/Nhạc trẻ</li>
+                            <li>Tuổi >= 30: Ưu tiên nhạc nhẹ/Classic</li>
+                            <li>Ngẫu nhiên từ 200,000 dòng dữ liệu</li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Cột phải: Kết quả -->
+            <div class="col-lg-8 main-content">
+                {% if user_info %}
+                <div class="user-info-banner mb-4 shadow-sm">
+                    <div class="row align-items-center">
+                        <div class="col-auto">
+                            <div class="bg-white text-primary rounded-circle d-flex align-items-center justify-content-center"
+                                style="width: 60px; height: 60px;">
+                                <i class="bi bi-person-fill fs-2"></i>
+                            </div>
+                        </div>
+                        <div class="col">
+                            <h4 class="mb-0">Hồ sơ: {{ user_info.msno[:15] }}...</h4>
+                            <div class="mt-2">
+                                <span class="me-3"><i class="bi bi-calendar-event"></i> <strong>Tuổi:</strong> {{
+                                    user_info.bd }}</span>
+                                <span class="me-3"><i class="bi bi-geo-alt"></i> <strong>Thành phố:</strong> {{
+                                    user_info.city }}</span>
+                                <span><i class="bi bi-gender-ambiguous"></i> <strong>Giới tính:</strong> {{
+                                    user_info.gender }}</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <h5 class="mb-3 fw-bold"><i class="bi bi-stars text-warning"></i> DÀNH RIÊNG CHO BẠN</h5>
+
+                <div class="row g-3">
+                    {% for song in recommendations %}
+                    <div class="col-12">
+                        <div class="card song-card shadow-sm p-2">
+                            <div class="card-body d-flex align-items-center">
+                                <div class="flex-shrink-0">
+                                    <div class="bg-light rounded d-flex align-items-center justify-content-center"
+                                        style="width: 50px; height: 50px;">
+                                        <i class="bi bi-play-circle-fill fs-3 text-primary"></i>
+                                    </div>
+                                </div>
+                                <div class="flex-grow-1 ms-3">
+                                    <h6 class="mb-0 fw-bold">{{ song.name }}</h6>
+                                    <div class="small text-muted">{{ song.artist_name }}</div>
+                                </div>
+                                <div class="text-end">
+                                    <span class="badge genre-badge p-2 mb-1">Genre: {{ song.genre_ids }}</span>
+                                    <div class="small text-secondary">Lang code: {{ song.language }}</div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    {% endfor %}
+                </div>
+                {% else %}
+                <div class="text-center py-5 mt-5">
+                    <i class="bi bi-music-note-list display-1 text-muted"></i>
+                    <h3 class="mt-3 text-muted">Chưa có dữ liệu phân tích</h3>
+                    <p class="text-muted">Vui lòng chọn một User từ danh sách bên trái hoặc tạo mới để xem gợi ý cá nhân
+                        hóa.</p>
+                </div>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+
+    <footer class="text-center py-4 mt-5 border-top text-muted small">
+        &copy; 2026 Music Recommendation System Demo - Sử dụng dữ liệu KKBox
+    </footer>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+</body>
+
+</html>

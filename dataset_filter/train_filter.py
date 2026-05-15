@@ -17,6 +17,6 @@ print(train.head())
 print("Total interactions:", len(train))
 
 # Lưu file
-train.to_csv("train_filtered.csv", index=False)
+train.to_csv("dataset_filter/train_filtered.csv", index=False)
 
 print("Saved train_filtered.csv")

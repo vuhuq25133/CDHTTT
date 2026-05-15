@@ -1,0 +1,196 @@
+<!DOCTYPE html>
+<html lang="vi">
+
+<head>
+    <meta charset="UTF-8">
+    <title>MusicAI Dashboard</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.0/font/bootstrap-icons.css">
+    <style>
+        body {
+            background-color: #121212;
+            color: white;
+        }
+
+        .sidebar {
+            background: #000;
+            min-height: 100vh;
+            width: 240px;
+            position: fixed;
+            padding: 20px;
+        }
+
+        .main-view {
+            margin-left: 240px;
+            padding: 40px;
+        }
+
+        .song-card {
+            background: #181818;
+            transition: background 0.25s, transform 0.25s;
+            cursor: pointer;
+            border-radius: 10px;
+            border: none;
+        }
+
+        .song-card:hover {
+            background: #282828;
+            transform: translateY(-5px);
+        }
+
+        .nav-link {
+            color: #b3b3b3;
+            text-decoration: none;
+            display: block;
+            padding: 10px 0;
+        }
+
+        .nav-link:hover,
+        .nav-link.active {
+            color: white;
+        }
+
+        .text-spotify {
+            color: #1DB954;
+        }
+
+        .taste-badge {
+            background: #1a1a2e;
+            border: 1px solid #1DB954;
+            border-radius: 8px;
+            padding: 12px 18px;
+            font-size: 0.85rem;
+        }
+
+        .section-title {
+            border-left: 4px solid #1DB954;
+            padding-left: 12px;
+        }
+
+        /* Horizontal scroll row for KNN section */
+        .scroll-row {
+            display: flex;
+            gap: 16px;
+            overflow-x: auto;
+            padding-bottom: 8px;
+        }
+
+        .scroll-row::-webkit-scrollbar {
+            height: 4px;
+        }
+
+        .scroll-row::-webkit-scrollbar-thumb {
+            background: #333;
+            border-radius: 2px;
+        }
+
+        .song-card-sm {
+            background: #181818;
+            border-radius: 8px;
+            padding: 12px;
+            min-width: 160px;
+            max-width: 160px;
+            transition: background 0.2s;
+            cursor: pointer;
+            text-decoration: none;
+            color: white;
+        }
+
+        .song-card-sm:hover {
+            background: #282828;
+            color: white;
+        }
+    </style>
+</head>
+
+<body>
+    <div class="sidebar">
+        <h3 class="text-spotify mb-5"><i class="bi bi-spotify"></i> MusicAI</h3>
+        <a href="/dashboard" class="nav-link active"><i class="bi bi-house-door-fill me-2"></i> Trang chủ</a>
+        <hr class="border-secondary">
+        <a href="/logout" class="nav-link text-danger mt-3"><i class="bi bi-box-arrow-left me-2"></i> Đăng xuất</a>
+    </div>
+
+    <div class="main-view">
+
+        <!-- Header -->
+        <header class="d-flex justify-content-between align-items-start mb-5">
+            <div>
+                <h2 class="mb-1">Xin chào, <span class="text-spotify">{{ user.msno[:10] }}...</span></h2>
+                <p class="text-muted small mb-0">Âm nhạc được cá nhân hóa dành riêng cho bạn</p>
+            </div>
+            {% if taste_profile %}
+            <div class="taste-badge text-end">
+                <div class=" mb-1" style="font-size:0.75rem;">HỒ SƠ SỞ THÍCH</div>
+                <div><i class="bi bi-music-note-list me-1 text-spotify"></i>
+                    Thể loại: <strong>{{ taste_profile.top_genre }}</strong>
+                </div>
+                <div><i class="bi bi-translate me-1 text-spotify"></i>
+                    Ngôn ngữ: <strong>{{ taste_profile.top_language }}</strong>
+                </div>
+            </div>
+            {% endif %}
+        </header>
+
+        <!-- SECTION 1: SVD Hybrid AI -->
+        <section class="mb-5">
+            <div class="d-flex align-items-center mb-4">
+                <h4 class="section-title text-white mb-0 me-3">Dành riêng cho bạn</h4>
+                <span class="badge bg-success">SVD Hybrid AI</span>
+            </div>
+
+            {% if svd_songs %}
+            <div class="row row-cols-2 row-cols-md-4 g-4">
+                {% for s in svd_songs %}
+                <div class="col">
+                    <a href="{{ song_url(s.song_id) }}" class="text-decoration-none">
+                        <div class="card song-card h-100 p-3 text-white">
+                            <div class="rounded mb-3 d-flex align-items-center justify-content-center"
+                                style="height:130px; background: linear-gradient(135deg,#1DB95422,#181818);">
+                                <i class="bi bi-music-note-beamed fs-1 text-spotify"></i>
+                            </div>
+                            <h6 class="text-truncate mb-1">{{ s.song_name }}</h6>
+                            <p class="small text-muted mb-0 text-truncate">{{ s.artist_name }}</p>
+                        </div>
+                    </a>
+                </div>
+                {% endfor %}
+            </div>
+            {% else %}
+            <div class="text-muted fst-italic">
+                <i class="bi bi-info-circle me-1"></i>
+                Chưa có đủ dữ liệu để cá nhân hóa. Hãy nghe thêm nhạc!
+            </div>
+            {% endif %}
+        </section>
+
+        <!-- SECTION 2: KNN Hybrid -->
+        {% if knn_songs %}
+        <section class="mb-5">
+            <div class="d-flex align-items-center mb-4">
+                <h4 class="section-title text-white mb-0 me-3">Người nghe tương tự cũng thích</h4>
+                <span class="badge bg-primary">KNN Item-Based</span>
+            </div>
+
+            <div class="scroll-row">
+                {% for s in knn_songs %}
+                <a href="{{ song_url(s.song_id) }}" class="song-card-sm">
+                    <div class="d-flex align-items-center justify-content-center rounded mb-2"
+                        style="height:80px; background: linear-gradient(135deg,#1a3a6e33,#181818);">
+                        <i class="bi bi-vinyl fs-2 text-primary"></i>
+                    </div>
+                    <div class="small fw-bold text-truncate">{{ s.song_name }}</div>
+                    <div class="text-muted"
+                        style="font-size:0.75rem; white-space:nowrap; overflow:hidden; text-overflow:ellipsis;">
+                        {{ s.artist_name }}
+                    </div>
+                </a>
+                {% endfor %}
+            </div>
+        </section>
+        {% endif %}
+
+    </div>
+</body>
+
+</html>

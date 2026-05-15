@@ -1,0 +1,367 @@
+<!DOCTYPE html>
+<html lang="vi">
+
+<head>
+    <meta charset="UTF-8">
+    <title>Đăng ký - MusicAI</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.0/font/bootstrap-icons.css">
+    <style>
+        body {
+            background: #121212;
+            color: #fff;
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .register-card {
+            background: #181818;
+            border-radius: 16px;
+            padding: 40px 48px;
+            width: 100%;
+            max-width: 620px;
+            box-shadow: 0 8px 40px rgba(0, 0, 0, 0.6);
+        }
+
+        .logo {
+            color: #1DB954;
+            font-size: 2rem;
+            font-weight: 700;
+        }
+
+        .form-control,
+        .form-select {
+            background: #282828;
+            border: 1px solid #333;
+            color: #fff;
+            border-radius: 8px;
+        }
+
+        .form-control:focus,
+        .form-select:focus {
+            background: #333;
+            border-color: #1DB954;
+            color: #fff;
+            box-shadow: 0 0 0 2px rgba(29, 185, 84, 0.25);
+        }
+
+        .form-control::placeholder {
+            color: #666;
+        }
+
+        /* Genre chip grid */
+        .genre-grid {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 8px;
+        }
+
+        .genre-chip input[type="checkbox"] {
+            display: none;
+        }
+
+        .genre-chip label {
+            display: inline-block;
+            padding: 6px 14px;
+            border: 1px solid #444;
+            border-radius: 20px;
+            font-size: 0.85rem;
+            color: #b3b3b3;
+            cursor: pointer;
+            transition: all 0.18s;
+            user-select: none;
+        }
+
+        .genre-chip input:checked+label {
+            background: #1DB954;
+            border-color: #1DB954;
+            color: #000;
+            font-weight: 600;
+        }
+
+        .genre-chip label:hover {
+            border-color: #1DB954;
+            color: #fff;
+        }
+
+        /* Disabled state when 3 selected */
+        .genre-chip.disabled label {
+            opacity: 0.4;
+            cursor: not-allowed;
+        }
+
+        /* Language chips (single select) */
+        .lang-chip input[type="radio"] {
+            display: none;
+        }
+
+        .lang-chip label {
+            display: inline-block;
+            padding: 6px 14px;
+            border: 1px solid #444;
+            border-radius: 20px;
+            font-size: 0.85rem;
+            color: #b3b3b3;
+            cursor: pointer;
+            transition: all 0.18s;
+            user-select: none;
+        }
+
+        .lang-chip input:checked+label {
+            background: #0d6efd;
+            border-color: #0d6efd;
+            color: #fff;
+            font-weight: 600;
+        }
+
+        .lang-chip label:hover {
+            border-color: #0d6efd;
+            color: #fff;
+        }
+
+        .section-label {
+            font-size: 0.8rem;
+            text-transform: uppercase;
+            letter-spacing: 0.08em;
+            color: #888;
+            margin-bottom: 10px;
+        }
+
+        .counter-badge {
+            font-size: 0.78rem;
+            color: #1DB954;
+            margin-left: 8px;
+        }
+
+        .btn-register {
+            background: #1DB954;
+            color: #000;
+            font-weight: 700;
+            border: none;
+            border-radius: 30px;
+            padding: 12px;
+            font-size: 1rem;
+            transition: background 0.2s;
+        }
+
+        .btn-register:hover {
+            background: #17a348;
+            color: #000;
+        }
+
+        .btn-register:disabled {
+            background: #555;
+            color: #999;
+            cursor: not-allowed;
+        }
+
+        .divider {
+            border-color: #333;
+        }
+
+        .step-hint {
+            font-size: 0.75rem;
+            color: #666;
+        }
+
+        .pref-required-hint {
+            font-size: 0.78rem;
+            color: #e74c3c;
+            display: none;
+            margin-top: 6px;
+        }
+
+        .pref-required-hint.show {
+            display: block;
+        }
+    </style>
+</head>
+
+<body>
+    <div class="register-card">
+        <div class="text-center mb-4">
+            <div class="logo"><i class="bi bi-spotify"></i> MusicAI</div>
+            <p class="text-muted small mt-1">Tạo tài khoản để nhận gợi ý cá nhân hóa</p>
+        </div>
+
+        {% with messages = get_flashed_messages(with_categories=true) %}
+        {% if messages %}
+        {% for cat, msg in messages %}
+        <div class="alert alert-{{ cat }} alert-dismissible fade show py-2" role="alert">
+            {{ msg }}
+            <button type="button" class="btn-close btn-close-white" data-bs-dismiss="alert"></button>
+        </div>
+        {% endfor %}
+        {% endif %}
+        {% endwith %}
+
+        <form method="POST" action="/register" id="registerForm">
+
+            <!-- User ID -->
+            <div class="mb-3">
+                <label class="form-label small text-muted">User ID <span class="text-danger">*</span></label>
+                <input type="text" name="msno" class="form-control" placeholder="Nhập ID của bạn" required>
+            </div>
+
+            <div class="row g-3 mb-3">
+                <div class="col-6">
+                    <label class="form-label small text-muted">Tuổi</label>
+                    <input type="number" name="bd" class="form-control" placeholder="VD: 22" min="1" max="100">
+                </div>
+                <div class="col-6">
+                    <label class="form-label small text-muted">Giới tính</label>
+                    <select name="gender" class="form-select">
+                        <option value="unknown">Không xác định</option>
+                        <option value="male">Nam</option>
+                        <option value="female">Nữ</option>
+                    </select>
+                </div>
+            </div>
+
+            <hr class="divider my-4">
+
+            <!-- Genre preference -->
+            <div class="mb-4">
+                <div class="d-flex align-items-center mb-2">
+                    <span class="section-label mb-0">
+                        <i class="bi bi-music-note-list me-1"></i>Thể loại yêu thích
+                        <span class="text-danger">*</span>
+                    </span>
+                    <span class="counter-badge" id="genreCounter">0 / 3 đã chọn</span>
+                </div>
+                <p class="step-hint mb-2">Chọn ít nhất 1, tối đa 3 thể loại để hệ thống gợi ý chính xác hơn.</p>
+
+                {% if genres %}
+                <div class="genre-grid" id="genreGrid">
+                    {% for g in genres %}
+                    <div class="genre-chip" id="chip-{{ loop.index }}">
+                        <input type="checkbox" name="pref_genres" value="{{ g }}" id="genre-{{ loop.index }}">
+                        <label for="genre-{{ loop.index }}">{{ g }}</label>
+                    </div>
+                    {% endfor %}
+                </div>
+                {% else %}
+                <div class="alert alert-warning py-2 small">
+                    <i class="bi bi-exclamation-triangle me-1"></i>
+                    Không tải được danh sách thể loại. Bạn vẫn có thể đăng ký và cập nhật sau.
+                </div>
+                {% endif %}
+
+                <div class="pref-required-hint" id="genreHint">
+                    <i class="bi bi-exclamation-circle me-1"></i>Vui lòng chọn ít nhất 1 thể loại.
+                </div>
+            </div>
+
+            <!-- Language preference -->
+            <div class="mb-4">
+                <div class="section-label mb-2">
+                    <i class="bi bi-translate me-1"></i>Ngôn ngữ yêu thích
+                    <span class="text-danger">*</span>
+                </div>
+                <p class="step-hint mb-2">Chọn 1 ngôn ngữ chính bạn muốn nghe.</p>
+
+                {% if languages %}
+                <div class="genre-grid" id="langGrid">
+                    {% for lang in languages %}
+                    <div class="lang-chip">
+                        <input type="radio" name="pref_language" value="{{ lang }}" id="lang-{{ loop.index }}">
+                        <label for="lang-{{ loop.index }}">{{ lang }}</label>
+                    </div>
+                    {% endfor %}
+                </div>
+                {% else %}
+                <div class="alert alert-warning py-2 small">
+                    <i class="bi bi-exclamation-triangle me-1"></i>
+                    Không tải được danh sách ngôn ngữ. Bạn vẫn có thể đăng ký và cập nhật sau.
+                </div>
+                {% endif %}
+
+                <div class="pref-required-hint" id="langHint">
+                    <i class="bi bi-exclamation-circle me-1"></i>Vui lòng chọn 1 ngôn ngữ.
+                </div>
+            </div>
+
+            <button type="submit" class="btn btn-register w-100 mt-2" id="submitBtn">
+                <i class="bi bi-person-plus-fill me-1"></i> Tạo tài khoản
+            </button>
+        </form>
+
+        <p class="text-center text-muted small mt-4 mb-0">
+            Đã có tài khoản?
+            <a href="/login" class="text-decoration-none" style="color:#1DB954;">Đăng nhập</a>
+        </p>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <script>
+        const MAX_GENRES = 3;
+        const checkboxes = document.querySelectorAll('input[name="pref_genres"]');
+        const radios = document.querySelectorAll('input[name="pref_language"]');
+        const counter = document.getElementById('genreCounter');
+        const chips = document.querySelectorAll('.genre-chip');
+        const genreHint = document.getElementById('genreHint');
+        const langHint = document.getElementById('langHint');
+
+        // ── Genre: cập nhật trạng thái chip + counter ──────────────────
+        function updateGenreState() {
+            const checked = [...checkboxes].filter(c => c.checked).length;
+            counter.textContent = `${checked} / ${MAX_GENRES} đã chọn`;
+            counter.style.color = checked === MAX_GENRES ? '#faad14' : '#1DB954';
+
+            chips.forEach(chip => {
+                const cb = chip.querySelector('input[type="checkbox"]');
+                if (!cb.checked && checked >= MAX_GENRES) {
+                    chip.classList.add('disabled');
+                    cb.disabled = true;
+                } else {
+                    chip.classList.remove('disabled');
+                    cb.disabled = false;
+                }
+            });
+
+            // Ẩn hint khi đã chọn
+            if (checked > 0) genreHint.classList.remove('show');
+        }
+
+        checkboxes.forEach(cb => cb.addEventListener('change', updateGenreState));
+        updateGenreState();
+
+        // Ẩn hint ngôn ngữ khi chọn
+        radios.forEach(r => r.addEventListener('change', () => langHint.classList.remove('show')));
+
+        // ── Submit: validate trước khi gửi ─────────────────────────────
+        document.getElementById('registerForm').addEventListener('submit', function (e) {
+            let valid = true;
+
+            // Chỉ validate genre nếu có danh sách
+            if (checkboxes.length > 0) {
+                const checkedCount = [...checkboxes].filter(c => c.checked).length;
+                if (checkedCount === 0) {
+                    genreHint.classList.add('show');
+                    valid = false;
+                }
+            }
+
+            // Chỉ validate language nếu có danh sách
+            if (radios.length > 0) {
+                const langSelected = [...radios].some(r => r.checked);
+                if (!langSelected) {
+                    langHint.classList.add('show');
+                    valid = false;
+                }
+            }
+
+            if (!valid) {
+                e.preventDefault();
+                // Cuộn xuống hint đầu tiên có lỗi
+                document.querySelector('.pref-required-hint.show')?.scrollIntoView({
+                    behavior: 'smooth', block: 'center'
+                });
+            }
+        });
+    </script>
+</body>
+
+</html>

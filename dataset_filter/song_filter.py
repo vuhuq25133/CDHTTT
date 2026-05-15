@@ -33,7 +33,9 @@ filtered_songs = filtered_songs[
         "song_id",
         "artist_name",
         "language",
-        "main_genre"
+        "main_genre",
+        "composer",
+        "lyricist"
     ]
 ]
 
@@ -45,6 +47,6 @@ print("\nSố bài hát còn lại:", len(filtered_songs))
 print(filtered_songs.head())
 
 # Lưu file mới
-filtered_songs.to_csv("songs_filtered.csv", index=False)
+filtered_songs.to_csv("dataset_filter/songs_filtered.csv", index=False)
 
 print("\nĐã lưu: songs_filtered.csv")
